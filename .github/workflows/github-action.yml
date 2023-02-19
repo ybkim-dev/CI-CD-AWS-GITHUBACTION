@@ -8,6 +8,9 @@ on:
     branches: main
   pull_request:
     branches: main
+    
+env:
+  DEPLOY_ZIP_FILE: ci-cd-demo.zip
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -40,8 +43,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      - name: S3 업로드
-        run: aws deploy push --application-name ci-cd-demo-codedeploy --description "ci-cd-demo-application-server" --s3-location s3://ci-cd-demo-bucket/server/build.zip --source .
+      - name: Zip 파일 생성
+        run: |
+          mkdir -p before-deploy/
+          cp appspec.yml before-deploy/
+          cp scripts/*.sh before-deploy/
+          cp build/libs/*.jar before-deploy/
+          cd before-deploy && zip -r before-deploy *
+          cd ../ && mkdir -p deploy
+          mv before-deploy/before-deploy.zip deploy/$DEPLOY_ZIP_FILE
 
+      - name: S3 업로드
+        run: aws s3 cp --region ap-northeast-2 ./deploy/$DEPLOY_ZIP_FILE s3://ci-cd-demo-bucket/server/build.zip
+     
       - name: code deploy
         run: aws deploy create-deployment --application-name ci-cd-demo-codedeploy --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name ci-cd-deploy-group --s3-location bucket=ci-cd-demo-bucket,bundleType=zip,key=server/build.zip
