@@ -41,7 +41,7 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: S3 업로드
-        run: aws deploy push --application-name ci-cd-demo-server --description "ci-cd-demo-application-server" --s3-location s3://ci-cd-demo-bucket/server/build.zip --source .
+        run: aws deploy push --application-name ci-cd-demo-codedeploy --description "ci-cd-demo-application-server" --s3-location s3://ci-cd-demo-bucket/server/build.zip --source .
 
       - name: code deploy
-        run: aws deploy create-deployment --application-name ci-cd-demo-server --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name ci-cd-deploy-group --s3-location bucket=ci-cd-demo-bucket,bundleType=zip,key=server/build.zip
+        run: aws deploy create-deployment --application-name ci-cd-demo-codedeploy --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name ci-cd-deploy-group --s3-location bucket=ci-cd-demo-bucket,bundleType=zip,key=server/build.zip
